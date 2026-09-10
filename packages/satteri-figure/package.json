@@ -1,0 +1,27 @@
+{
+  "name": "satteri-figure",
+  "description": "A Satteri plugin to convert images into figures with captions.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Abhigyan Trips <contact@abhi.now>",
+  "repository": "https://github.com/abhigyantrips/satteri-plugins",
+  "keywords": [
+    "satteri",
+    "figure",
+    "figcaption",
+    "plugin",
+    "image",
+    "caption"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "main": "index.js",
+  "packageManager": "pnpm@10.29.3",
+  "devDependencies": {
+    "satteri": "^0.10.5"
+  },
+  "peerDependencies": {
+    "satteri": "^0.10.5"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "satteri-plugins",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "Abhigyan Trips <contact@abhi.now>",
+  "repository": "https://github.com/abhigyantrips/satteri-plugins",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "pnpm lint --workspaces",
+    "format": "pnpm format --workspaces"
+  },
+  "packageManager": "pnpm@10.29.3"
+}
