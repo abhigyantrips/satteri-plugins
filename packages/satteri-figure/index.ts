@@ -1,15 +1,20 @@
-import { defineHastPlugin } from "satteri";
+import {
+	defineHastPlugin,
+	type HastNode,
+	type HastPluginDefinition,
+} from "satteri";
+
+type HastElement = Extract<HastNode, { type: "element" }>;
+type HastImage = HastElement & { tagName: "img" };
 
 // HTML inter-element whitespace.
 // See <https://infra.spec.whatwg.org/#ascii-whitespace>.
 const whitespaceRe = /^[ \t\n\f\r]*$/;
 
-/**
- * @typedef {object} SatteriFigureOptions
- * @property {string | string[]} [className]
- *   Class(es) for the wrapping `figure` element. No classes are added
- *   by default.
- */
+export interface SatteriFigureOptions {
+	/** Class(es) for the wrapping `figure` element. */
+	className?: string | string[];
+}
 
 /**
  * Satteri plugin to transform an image with alt text to a figure with
@@ -18,12 +23,12 @@ const whitespaceRe = /^[ \t\n\f\r]*$/;
  * Port of [`@microflash/rehype-figure`](https://github.com/naiyerasif/rehype-figure)
  * to a Satteri HAST plugin.
  *
- * @param {SatteriFigureOptions} [options]
- *   Optional settings.
- * @returns
- *   HAST plugin definition; pass the result to `hastPlugins`.
+ * @param options Optional settings.
+ * @returns HAST plugin definition; pass the result to `hastPlugins`.
  */
-export default function satteriFigure(options = {}) {
+export default function satteriFigure(
+	options: SatteriFigureOptions = {},
+): HastPluginDefinition {
 	return defineHastPlugin({
 		name: "satteri-figure",
 		element: [
@@ -41,16 +46,14 @@ export default function satteriFigure(options = {}) {
 					ctx.replaceNode(
 						node,
 						node.children
-							.filter(
-								(child) => child.type === "element" && child.tagName === "img"
-							)
+							.filter(isImage)
 							.map((image) =>
 								isImageWithAlt(image) &&
 								!isImageWithCaption(parent) &&
 								!isImageLink(parent)
 									? createFigure(image, options)
-									: image
-							)
+									: image,
+							),
 					);
 				},
 			},
@@ -68,7 +71,9 @@ export default function satteriFigure(options = {}) {
 						isImageWithCaption(parent) ||
 						isImageLink(parent) ||
 						// Handled by the paragraph visitor above.
-						(parent?.tagName === "p" && hasOnlyImages(parent))
+						(parent?.type === "element" &&
+							parent.tagName === "p" &&
+							hasOnlyImages(parent))
 					) {
 						return;
 					}
@@ -80,41 +85,58 @@ export default function satteriFigure(options = {}) {
 	});
 }
 
-function hasOnlyImages(node) {
+function hasOnlyImages(
+	node: Readonly<HastNode> | undefined,
+): node is Readonly<HastElement> {
 	return (
 		node?.type === "element" &&
 		node.children.every(
 			(child) =>
-				(child.type === "element" && child.tagName === "img") ||
-				(child.type === "text" && whitespaceRe.test(child.value))
+				isImage(child) ||
+				(child.type === "text" && whitespaceRe.test(child.value)),
 		)
 	);
 }
 
-function isImageWithAlt(node) {
+function isImage(node: Readonly<HastNode>): node is Readonly<HastImage> {
+	return node.type === "element" && node.tagName === "img";
+}
+
+function isImageWithAlt(
+	node: Readonly<HastNode> | undefined,
+): node is Readonly<HastImage> {
 	return (
-		node?.type === "element" &&
-		node.tagName === "img" &&
-		Boolean(node.properties?.alt) &&
-		Boolean(node.properties?.src)
+		isDefinedNode(node) &&
+		isImage(node) &&
+		Boolean(node.properties.alt) &&
+		Boolean(node.properties.src)
 	);
 }
 
-function isImageWithCaption(node) {
+function isImageWithCaption(node: Readonly<HastNode> | undefined): boolean {
 	return (
 		node?.type === "element" &&
 		node.tagName === "figure" &&
 		node.children.some(
-			(child) => child.type === "element" && child.tagName === "figcaption"
+			(child) => child.type === "element" && child.tagName === "figcaption",
 		)
 	);
 }
 
-function isImageLink(node) {
+function isImageLink(node: Readonly<HastNode> | undefined): boolean {
 	return node?.type === "element" && node.tagName === "a";
 }
 
-function createFigure(image, options) {
+function isDefinedNode(
+	node: Readonly<HastNode> | undefined,
+): node is Readonly<HastNode> {
+	return node !== undefined;
+}
+
+function createFigure(
+	image: Readonly<HastImage>,
+	options: SatteriFigureOptions,
+): HastElement {
 	const classes = toClasses(options.className);
 
 	return {
@@ -138,7 +160,7 @@ function createFigure(image, options) {
 	};
 }
 
-function toClasses(className) {
+function toClasses(className: SatteriFigureOptions["className"]): string[] {
 	if (!className) {
 		return [];
 	}

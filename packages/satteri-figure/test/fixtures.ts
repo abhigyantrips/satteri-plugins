@@ -1,4 +1,13 @@
-export default [
+import type { SatteriFigureOptions } from "../index.js";
+
+export interface Scenario {
+	title: string;
+	input: string;
+	options?: SatteriFigureOptions;
+	expected: string;
+}
+
+const scenarios: Scenario[] = [
 	{
 		title: "image with alt text as plaintext",
 		input: `![Image](http://example.com/test.png)`,
@@ -48,3 +57,5 @@ export default [
 		expected: `<p>A paragraph bereft of images</p>\n`,
 	},
 ];
+
+export default scenarios;

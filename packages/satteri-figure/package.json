@@ -14,19 +14,30 @@
     "caption"
   ],
   "scripts": {
-    "test": "node --test ./test/plugin.test.js"
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --project tsconfig.json",
+    "test": "tsx --test ./test/plugin.test.ts",
+    "prepack": "pnpm run build"
   },
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
   },
   "files": [
-    "index.js"
+    "dist"
   ],
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
-    "satteri": "^0.10.5"
+    "@types/node": "^22.20.2",
+    "satteri": "^0.10.5",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
   },
   "peerDependencies": {
     "satteri": "^0.10.5"

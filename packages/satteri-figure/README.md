@@ -49,6 +49,30 @@ Running that with `node example.js` yields:
 
 The default export is `satteriFigure`, a function returning a HAST plugin definition to pass to `hastPlugins`.
 
+```ts
+import satteriFigure, { type SatteriFigureOptions } from "satteri-figure";
+
+const options: SatteriFigureOptions = {
+  className: ["figure", "figure--captioned"],
+};
+
+const plugin = satteriFigure(options);
+```
+
+Its TypeScript API is:
+
+```ts
+import type { HastPluginDefinition } from "satteri";
+
+export interface SatteriFigureOptions {
+  className?: string | string[];
+}
+
+export default function satteriFigure(
+  options?: SatteriFigureOptions,
+): HastPluginDefinition;
+```
+
 The following options are available. All of them are optional.
 
 - `className`: class (or list of classes) for the wrapped `figure` element
@@ -57,7 +81,13 @@ By default, no classes are added to the `figure` element.
 
 ## Development
 
-- Run `pnpm test` to run tests
+From the workspace root:
+
+- Run `pnpm build` to compile the package to `dist/`
+- Run `pnpm typecheck` to type-check the implementation, tests, and fixtures
+- Run `pnpm test` to run the behavior tests
+- Run `pnpm lint` to run package lint scripts
+- Run `pnpm format` to run package formatting scripts
 
 ## License
 
