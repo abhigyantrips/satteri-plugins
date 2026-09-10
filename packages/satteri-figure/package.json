@@ -14,9 +14,16 @@
     "caption"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test ./test/plugin.test.js"
   },
+  "type": "module",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js"
+  ],
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
     "satteri": "^0.10.5"
