@@ -1,0 +1,44 @@
+{
+	"name": "satteri-autolink-paragraphs",
+	"description": "A Satteri plugin to add permalink anchors to top-level paragraphs.",
+	"version": "0.0.1",
+	"license": "MIT",
+	"author": "Abhigyan Trips <contact@abhi.now>",
+	"repository": "https://github.com/abhigyantrips/satteri-plugins",
+	"keywords": [
+		"satteri",
+		"paragraph",
+		"autolink",
+		"permalink",
+		"plugin"
+	],
+	"scripts": {
+		"build": "tsc --project tsconfig.build.json",
+		"typecheck": "tsc --project tsconfig.json",
+		"test": "tsx --test ./test/plugin.test.ts",
+		"prepack": "pnpm run build"
+	},
+	"type": "module",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
+		}
+	},
+	"files": [
+		"dist"
+	],
+	"packageManager": "pnpm@10.29.3",
+	"devDependencies": {
+		"@types/node": "^22.20.2",
+		"satteri": "^0.10.5",
+		"tsx": "^4.23.13",
+		"typescript": "^7.0.2"
+	},
+	"peerDependencies": {
+		"satteri": "^0.10.5"
+	}
+}
