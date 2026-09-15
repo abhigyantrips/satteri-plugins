@@ -52,6 +52,7 @@ import satteriAutolinkParagraphs, {
 const options: SatteriAutolinkParagraphsOptions = {
   behavior: "prepend",
   prefix: "note-",
+  paragraphProperties: { className: ["group"] },
 };
 
 const plugin = satteriAutolinkParagraphs(options);
@@ -72,6 +73,7 @@ interface SatteriAutolinkParagraphsOptions {
   prefix?: string;
   content?: HastContent | HastContent[] | BuildContent;
   properties?: HastProperties | BuildProperties;
+  paragraphProperties?: HastProperties | BuildProperties;
   test?: ParagraphTest;
 }
 ```
@@ -82,11 +84,37 @@ All options are optional:
 - `prefix`: prefix for generated IDs. Default: `paragraph-`.
 - `content`: static HAST link content or a builder receiving the readonly paragraph and its `{ id, index }`. Default: the text `¶`.
 - `properties`: static HAST properties or a builder receiving the readonly paragraph and its `{ id, index }`. Values override the default class and accessible label; the generated `href` always wins.
+- `paragraphProperties`: static HAST properties or a builder receiving the readonly paragraph and its `{ id, index }`. Existing paragraph properties are preserved unless overridden; the authored or generated `id` always wins.
 - `test`: synchronous predicate evaluated against each top-level paragraph before numbering. Skipped paragraphs do not consume an index.
 
 Non-empty authored paragraph IDs are preserved. Generated IDs are checked against every ID in the HAST; collisions gain a suffix such as `paragraph-1-2`. Duplicate authored IDs remain unchanged, but the plugin reports a warning because the fragment target is ambiguous.
 
 There is deliberately no `wrap` behavior because paragraphs may already contain links, and wrapping them would create invalid nested anchors.
+
+### Show the permalink on paragraph hover with Tailwind CSS
+
+Give each linked paragraph Tailwind's `group` class, then reveal the permalink when
+that group is hovered or contains keyboard focus:
+
+```ts
+satteriAutolinkParagraphs({
+  behavior: "append",
+  paragraphProperties: {
+    className: ["group"],
+  },
+  properties: {
+    className: [
+      "opacity-0",
+      "transition-opacity",
+      "group-hover:opacity-100",
+      "group-focus-within:opacity-100",
+    ],
+  },
+});
+```
+
+Use `append` or `prepend` for this pattern. The `before` and `after` behaviors make
+the permalink a sibling of the paragraph, so `group-hover` cannot target it.
 
 ## Development
 

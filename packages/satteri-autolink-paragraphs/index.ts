@@ -48,6 +48,8 @@ export interface SatteriAutolinkParagraphsOptions {
 	content?: HastContent | HastContent[] | BuildContent;
 	/** Static link properties or a per-paragraph properties builder. */
 	properties?: HastProperties | BuildProperties;
+	/** Static paragraph properties or a per-paragraph properties builder. */
+	paragraphProperties?: HastProperties | BuildProperties;
 	/** Synchronous predicate applied to top-level paragraphs before numbering. */
 	test?: ParagraphTest;
 }
@@ -85,9 +87,7 @@ export default function satteriAutolinkParagraphs(
 				const authoredId = getId(child);
 				const id = authoredId ?? createId(prefix, index, usedIds);
 
-				if (authoredId === undefined) {
-					ctx.setProperty(child, "id", id);
-				} else if ((idCounts.get(authoredId) ?? 0) > 1) {
+				if (authoredId !== undefined && (idCounts.get(authoredId) ?? 0) > 1) {
 					ctx.report({
 						message: `Duplicate authored id \"${authoredId}\" makes the paragraph permalink ambiguous`,
 						node: child,
@@ -96,6 +96,17 @@ export default function satteriAutolinkParagraphs(
 				}
 
 				const info = { id, index } satisfies ParagraphLinkInfo;
+				const configuredParagraphProperties = options.paragraphProperties;
+				const paragraphProperties =
+					typeof configuredParagraphProperties === "function"
+						? configuredParagraphProperties(child, info)
+						: configuredParagraphProperties;
+
+				for (const [key, value] of Object.entries(paragraphProperties ?? {})) {
+					if (key !== "id") ctx.setProperty(child, key, value);
+				}
+				ctx.setProperty(child, "id", id);
+
 				const link = createLink(child, info, options);
 				const space: HastContent = { type: "text", value: " " };
 

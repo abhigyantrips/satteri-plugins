@@ -177,6 +177,72 @@ describe("satteriAutolinkParagraphs", () => {
 		assert.match(html, /<p id="paragraph-2">Same\./);
 	});
 
+	it("adds static properties to every linked paragraph", () => {
+		assert.equal(
+			compile("One.\n\nTwo.", {
+				paragraphProperties: {
+					className: ["group"],
+					dataLinked: "true",
+				},
+			}).html,
+			'<p class="group" data-linked="true" id="paragraph-1">One. <a class="autolink-paragraph" aria-label="Link to this paragraph" href="#paragraph-1">¶</a></p>\n<p class="group" data-linked="true" id="paragraph-2">Two. <a class="autolink-paragraph" aria-label="Link to this paragraph" href="#paragraph-2">¶</a></p>\n',
+		);
+	});
+
+	it("calls the paragraph properties builder with link info", () => {
+		const calls: string[] = [];
+		assert.equal(
+			compile("One.\n\nTwo.", {
+				prefix: "p-",
+				paragraphProperties(paragraph, info) {
+					calls.push(
+						`${paragraph.tagName}:${info.id}:${info.index}`,
+					);
+					return { className: [`group-${info.index}`] };
+				},
+			}).html,
+			'<p class="group-1" id="p-1">One. <a class="autolink-paragraph" aria-label="Link to this paragraph" href="#p-1">¶</a></p>\n<p class="group-2" id="p-2">Two. <a class="autolink-paragraph" aria-label="Link to this paragraph" href="#p-2">¶</a></p>\n',
+		);
+		assert.deepEqual(calls, ["p:p-1:1", "p:p-2:2"]);
+	});
+
+	it("preserves existing properties while keeping the paragraph id authoritative", () => {
+		assert.equal(
+			compile("Authored.", {
+				paragraphProperties: {
+					className: ["group"],
+					id: "wrong",
+				},
+			}, [
+				defineHastPlugin({
+					name: "set-paragraph-properties",
+					before(root, ctx) {
+						const paragraph = root.children[0];
+						if (paragraph?.type !== "element") return;
+						ctx.setProperty(paragraph, "id", "chosen-id");
+						ctx.setProperty(paragraph, "title", "Existing title");
+					},
+				}),
+			]).html,
+			'<p id="chosen-id" title="Existing title" class="group">Authored. <a class="autolink-paragraph" aria-label="Link to this paragraph" href="#chosen-id">¶</a></p>\n',
+		);
+	});
+
+	it("only adds paragraph properties to accepted top-level paragraphs", () => {
+		const { html } = compile("Skip.\n\nKeep.\n\n> Nested.", {
+			paragraphProperties: { className: ["group"] },
+			test(paragraph) {
+				const first = paragraph.children[0];
+				return first?.type === "text" && first.value === "Keep.";
+			},
+		});
+
+		assert.match(html, /<p>Skip\.<\/p>/);
+		assert.match(html, /<p class="group" id="paragraph-1">Keep\./);
+		assert.match(html, /<blockquote>\n<p>Nested\.<\/p>\n<\/blockquote>/);
+		assert.equal((html.match(/class="group"/g) ?? []).length, 1);
+	});
+
 	it("supports static content and properties with authoritative href", () => {
 		assert.equal(
 			compile("Static.", {
