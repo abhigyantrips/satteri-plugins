@@ -24,6 +24,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - uses: changesets/action@v2
         with:
-          version: pnpm version-packages
+          version-script: pnpm version-packages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
