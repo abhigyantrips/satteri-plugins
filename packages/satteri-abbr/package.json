@@ -1,7 +1,7 @@
 {
   "name": "satteri-abbr",
   "description": "A Satteri plugin to wrap abbreviations in <abbr> elements with their definitions.",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "Abhigyan Trips <contact@abhi.now>",
   "repository": "https://github.com/abhigyantrips/satteri-plugins",
