@@ -149,6 +149,7 @@ interface Term {
 
 const defaultIgnore: HtmlTagName[] = ["a", "abbr", "code", "pre"];
 const wordCharRe = /\w/;
+const rawAbbrRe = /<abbr[\s/>]/i;
 
 /**
  * Satteri plugin to wrap abbreviations in `abbr` elements with their
@@ -186,13 +187,29 @@ export default function satteriAbbr(
 		.join("|");
 	const matcher = new RegExp(pattern, "g");
 
-	// Per-document state for `firstOnly`, reset by the `before` hook.
+	// Per-document state, reset by the `before` hook.
 	let wrapped = new Set<string>();
+	let warnedAboutRawAbbr = false;
 
 	return defineHastPlugin({
 		name: "satteri-abbr",
 		before() {
 			wrapped = new Set();
+			warnedAboutRawAbbr = false;
+		},
+		raw(node, ctx) {
+			if (warnedAboutRawAbbr || !rawAbbrRe.test(node.value)) return;
+			warnedAboutRawAbbr = true;
+
+			const message =
+				'satteri-abbr: found raw `<abbr>` markup. Raw HTML is opaque to ' +
+				"ancestor checks, so its text content may be wrapped again. " +
+				"Enable `features: { rawHtml: true }` to have it parsed into real " +
+				"elements the plugin can skip.";
+			ctx.report({ message, node, severity: "warning" });
+			// satteri 0.10 collects diagnostics without surfacing them, so warn
+			// directly as well.
+			console.warn(message);
 		},
 		text(node, ctx) {
 			if (hasIgnoredAncestor(node, ctx, ignore)) return;

@@ -97,7 +97,7 @@ The following options are available:
 - Longer forms win: if both `HTTP` and `HTTPS` are registered, `HTTPS` matches first.
 - Matching respects word boundaries: `HTML` does not match inside `HTMLified`.
 - Inline markup splits text nodes, so `H**T**ML` will not match `HTML`.
-- Raw HTML in Markdown is kept as opaque chunks by default, so ancestor checks cannot see it. Enable [`features: { rawHtml: true }`](https://satteri.bruits.org/docs/entry-points/#reparsing-raw-html-rawhtml) to have raw markup (such as an existing `<abbr>`) parsed into real elements the plugin can skip.
+- Raw HTML in Markdown is kept as opaque chunks by default, so ancestor checks cannot see it. Enable [`features: { rawHtml: true }`](https://satteri.bruits.org/docs/entry-points/#reparsing-raw-html-rawhtml) to have raw markup (such as an existing `<abbr>`) parsed into real elements the plugin can skip. Without it, an existing raw `<abbr>` may end up double-wrapped — the plugin prints a console warning when it spots raw `<abbr>` markup.
 
 ## Development
 
